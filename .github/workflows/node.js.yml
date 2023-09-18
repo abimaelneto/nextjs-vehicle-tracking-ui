@@ -18,9 +18,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+      - name: Make the script files executable
+        run: chmod +x telegram.sh
       - name: Conclusion
         id: conclusion
-        run: sh ./github/scripts/telegram.sh
+        run: ./telegram.sh
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
