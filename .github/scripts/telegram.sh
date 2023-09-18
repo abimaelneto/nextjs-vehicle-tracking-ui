@@ -23,9 +23,9 @@ send_msg () {
 # characters, since they're reserved in bash
 send_msg "
 -------------------------------------
-Github action *${$STATUS}!*
-\`Repository:  ${$GITHUB_REPOSITORY}\`
-\`Branch:      ${$GITHUB_REF_NAME}\`
-[Job Log here](${$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID})
+Github action *$STATUS!*
+\`Repository:  $GITHUB_REPOSITORY\`
+\`Branch:      $GITHUB_REF_NAME\`
+[Job Log here]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)
 --------------------------------------
 "
