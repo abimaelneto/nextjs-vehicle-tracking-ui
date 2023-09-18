@@ -4,8 +4,7 @@
 echo $TELEGRAM_CHAT_ID
 echo $STATUS
 
-end
-return
+exit 0
 # Get the token from Travis environment vars and build the bot URL:
 BOT_URL="https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage"
 
