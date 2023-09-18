@@ -22,9 +22,7 @@ jobs:
         run: chmod +x telegram.sh
       - name: Conclusion
         id: conclusion
-        run: |
-          ls -la
-          ./telegram.sh
+        run: ls -la
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
