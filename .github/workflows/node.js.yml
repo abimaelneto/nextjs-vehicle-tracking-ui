@@ -20,6 +20,22 @@ jobs:
       - uses: actions/checkout@v3
       - name: Make the script files executable
         run: chmod +x ./.github/scripts/telegram.sh
+      - run: npm install -g snyk
+      - name: Snyk Authentication
+      - run: snyk auth ${SNYK_TOKEN} |
+      - name: Static Application Security Testing
+      - run: snyk code test --json --org=${SNYK_TOKEN} > snyk-results.json
+      # - name: Use Node.js ${{ matrix.node-version }}
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: ${{ matrix.node-version }}
+      #     cache: "npm"
+      # - run: npm ci
+      # - run: npm run build --if-present
+      # - run: npm test
+      # - name: Upload Pages artifact
+      #   id: deploy
+      #   uses: actions/upload-pages-artifact@v2
       - name: Conclusion
         id: conclusion
         run: ./.github/scripts/telegram.sh
@@ -34,15 +50,3 @@ jobs:
           GITHUB_SERVER_URL: ${{ secrets.GITHUB_SERVER_URL }}
           GITHUB_RUN_ID: ${{ secrets.GITHUB_RUN_ID }}
           STATUS: ${{ job.status }}
-
-      # - name: Use Node.js ${{ matrix.node-version }}
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: ${{ matrix.node-version }}
-      #     cache: "npm"
-      # - run: npm ci
-      # - run: npm run build --if-present
-      # - run: npm test
-      # - name: Upload Pages artifact
-      #   id: deploy
-      #   uses: actions/upload-pages-artifact@v2
