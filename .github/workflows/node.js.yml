@@ -22,7 +22,7 @@ jobs:
       - name: Snyk Authentication
         run: snyk auth ${SNYK_TOKEN} |
       - name: Static Application Security Testing
-        run: snyk code test --json --org=${SNYK_TOKEN} > snyk-results.json
+        run: snyk code test --json --org=${{ secrets.SNYK_TOKEN }} > snyk-results.json
       # - name: Use Node.js ${{ matrix.node-version }}
       #   uses: actions/setup-node@v3
       #   with:
