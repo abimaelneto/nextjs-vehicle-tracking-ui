@@ -1,0 +1,93 @@
+image: python:latest
+
+stages:
+  - Build
+  - Source Composition Analysis
+  - Static Application Security Testing
+  - Dynamic Application Security Testing
+  - Deploy
+
+services:
+  - docker:dind
+
+build:
+  image: docker:latest
+  stage: Build
+  variables:
+    IMAGE: ${CI_REGISTRY_USER}/simpleapp:latest
+  script:
+    - "docker build -t ${CI_REGISTRY_USER}/simpleapp:latest ."
+    - "docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD}"
+    - "docker push ${CI_REGISTRY_USER}/simpleapp:latest"
+
+owasp:
+  image: docker:latest
+  stage: Dynamic Application Security Testing
+  script:
+    - echo 'hello!'
+    - ls
+    - docker run -v $(pwd):/zap/wrk -u $(id -u ${USER}):$(id -g ${USER}) -t owasp/zap2docker-stable zap-baseline.py -t ${URL2} -J report_json
+  artifacts:
+    when: always
+    paths: [report_json.json]
+  allow_failure: true
+
+deploy:
+  image: ubuntu:latest
+  stage: Deploy
+
+  script:
+    - 'echo "Building docker!"'
+    - apt-get update -qq
+    # Setup SSH deploy keys
+    - "which ssh-agent || ( apt-get install -qq openssh-client )"
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+    - echo "Deploy project on server"
+    - ssh $DEPLOY_HOST "docker pull ${CI_REGISTRY_USER}/simpleapp:latest"
+    - ssh $DEPLOY_HOST "docker stop app3"
+    - ssh $DEPLOY_HOST "docker run --rm -d --name app3 -p $APP_PORT:$APP_PORT ${CI_REGISTRY_USER}/simpleapp:latest"
+
+alert:
+  stage: Deploy
+  after_script:
+    - chmod +x telegram.sh
+    - ./telegram.sh
+  script:
+    - echo "send message to telegram!"
+
+bandit:
+  stage: Static Application Security Testing
+  script:
+    - pip install -r requirements.txt
+    - pip install bandit
+    - "bandit -r app.py -f json -o bandit-output.json"
+  artifacts:
+    when: always
+    paths: [bandit-output.json]
+  allow_failure: true
+
+snyk:
+  stage: Static Application Security Testing
+  script:
+    - npm install -g snyk
+    - snyk auth ${SNYK_TOKEN}
+    - snyk code test --json --org=${SNYK_ORG_ID}  > snyk-results.json
+  artifacts:
+    when: always
+    paths:
+      - snyk-results.json
+  allow_failure: true
+
+dependencycheck:
+  stage: Source Composition Analysis
+  script:
+    - pip install safety
+    - safety check -r requirements.txt --json > safety-results.json
+  artifacts:
+    paths: [safety-results.json]
+    when: always
+  allow_failure: true
