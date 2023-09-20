@@ -1,7 +1,7 @@
 "use client";
 import { FormEvent } from "react";
 
-export function NewRoutePage() {
+function NewRoutePage() {
   async function searchPlaces(event: FormEvent) {
     event.preventDefault();
     const source = (document.getElementById("source") as HTMLInputElement)
